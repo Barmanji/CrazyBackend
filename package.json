@@ -1,15 +1,19 @@
 {
-  "name": "bhekhend",
-  "version": "1.0.0",
-  "description": "YOUTUBE",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "keywords": [
-    "js",
-    "backend"
-  ],
-  "author": "Barmanji",
-  "license": "ISC"
+    "name": "bhekhend",
+    "version": "1.0.0",
+    "description": "YOUTUBE",
+    "type": "module",
+    "main": "index.js",
+    "scripts": {
+        "dev": "nodemod src/index.js"
+    },
+    "keywords": [
+        "js",
+        "backend"
+    ],
+    "author": "Barmanji",
+    "license": "ISC",
+    "devDependencies": {
+        "nodemon": "^3.1.7"
+    }
 }
