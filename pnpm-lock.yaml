@@ -54,6 +54,9 @@ importers:
       '@types/mongoose':
         specifier: ^5.11.97
         version: 5.11.97
+      '@types/multer':
+        specifier: ^1.4.12
+        version: 1.4.12
 
 packages:
 
@@ -88,6 +91,9 @@ packages:
   '@types/mongoose@5.11.97':
     resolution: {integrity: sha512-cqwOVYT3qXyLiGw7ueU2kX9noE8DPGRY6z8eUxudhXY8NZ7DMKYAxyZkLSevGfhCX3dO/AoX5/SO9lAzfjon0Q==}
     deprecated: Mongoose publishes its own types, so you do not need to install this package.
+
+  '@types/multer@1.4.12':
+    resolution: {integrity: sha512-pQ2hoqvXiJt2FP9WQVLPRO+AmiIm/ZYkavPlIQnx282u4ZrVdztx0pkh3jjpQt0Kz+YI0YhSG264y08UJKoUQg==}
 
   '@types/node@22.10.2':
     resolution: {integrity: sha512-Xxr6BBRCAOQixvonOye19wnzyDiUtTeqldOOmj3CkeblonbccA12PFwlufvRdrpjXxqnmUaeiU5EOA+7s5diUQ==}
@@ -947,6 +953,10 @@ snapshots:
       - snappy
       - socks
       - supports-color
+
+  '@types/multer@1.4.12':
+    dependencies:
+      '@types/express': 5.0.0
 
   '@types/node@22.10.2':
     dependencies:
