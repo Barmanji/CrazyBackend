@@ -30,13 +30,13 @@ const registerUser = asyncHandler(async(req, res) => {
     that we can use and apply many things to it, like findOne which helps to find a field or target read in mongooooooooose
     ========================== ASSIGNMNET = Console.log everything, FIGURE IT OUT! ==========================================
     */
-    const existedUser = User.findOne({
+    const existedUser = await User.findOne({
         $or: [{username},{email}]
-    })
+    });
 
-    if (existedUser) {
+    if (existedUser) { // retuns true then;
         throw new ApiError(409, "User with this email already exists")
-    }
+    };
 
     const avatarLocalPath = req.files?.avatar[0]?.path;
     const coverImageLocalPath = req.files?.coverImage[0]?.path; //[0] is for first property
@@ -46,7 +46,7 @@ const registerUser = asyncHandler(async(req, res) => {
     const avatarUpload = await uploadResultCloudinary(avatarLocalPath);
     const converImageUpload = await uploadResultCloudinary(coverImageLocalPath);
     if (!avatarUpload) {
-        throw new ApiError(400, "Avatar image is necessary")
+        throw new ApiError(400, "Avatar image is very necessary")
     }
 
     const user = await User.create({
