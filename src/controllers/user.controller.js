@@ -39,7 +39,12 @@ const registerUser = asyncHandler(async(req, res) => {
     };
 
     const avatarLocalPath = req.files?.avatar[0]?.path;
-    const coverImageLocalPath = req.files?.coverImage[0]?.path; //[0] is for first property
+    //const coverImageLocalPath = req.files?.coverImage[0]?.path; //[0] is for first property
+       let coverImageLocalPath;
+    if (req.files && Array.isArray(req.files.coverImage) && req.files.coverImage.length > 0) {
+        coverImageLocalPath = req.files.coverImage[0].path
+    }
+
     if (!avatarLocalPath) {
         throw new ApiError(400, "Avatar image is necessary")
     }
@@ -48,6 +53,8 @@ const registerUser = asyncHandler(async(req, res) => {
     if (!avatarUpload) {
         throw new ApiError(400, "Avatar image is very necessary")
     }
+
+    console.log("tera dhiyan kidhar hai?",req.files)
 
     const user = await User.create({
         fullname,
