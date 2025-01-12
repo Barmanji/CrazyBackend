@@ -4,6 +4,10 @@ import { User } from "../models/user.model.js";
 import { uploadResultCloudinary } from "../utils/FileUploadCloudinary.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 
+//--------------------------- Generally a good idea to make a method for----------------------------//
+//                            accesstoken and refresh, becusae we have to
+//                            use to alot
+
 const registerUser = asyncHandler(async(req, res) => {
     //S.1: get data from forntend-
     //S.2: Encrypt Decrypt pass with hasings ( considering the fact that we have validated all the form input values in frontend)
@@ -80,6 +84,24 @@ const registerUser = asyncHandler(async(req, res) => {
     //access and referesh token
     //send cookie
 const loginUser = asyncHandler(async(req, res) => {
+    const {email, username, password} = req.body;
+    if(!username || !email) {
+        throw new ApiError(400, "Atleast one of the field is required -> Email or Username")
+    }
+
+    //User.findOne({email}) --> this is valid as wellfor email only or for username just change it to username
+    const findUser = await User.findOne({
+        $or: [{email}, {username}] //better syntax
+    })
+
+    if(!findUser) {
+        throw new ApiError(404, "This user doesn't exist with this email or username")
+    }
+
+    const passwordValidity = await findUser.isPasswordCorrect(password)
+        if(!passwordValidity) {
+        throw new ApiError(401, "Invalid user credentials")
+    }
 
 })
 export {
