@@ -3,11 +3,26 @@ import { ApiError } from "../utils/ApiError.js";
 import { User } from "../models/user.model.js";
 import { uploadResultCloudinary } from "../utils/FileUploadCloudinary.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
+import cookieParser from "cookie-parser";
 
 //--------------------------- Generally a good idea to make a method for----------------------------//
 //                            accesstoken and refresh, becusae we have to
 //                            use to alot
 
+const generateAccessAndRefreshTokens = async(userID) => {
+    try {
+        const user = await User.findOne(userID)
+        const refreshToken = user.generateRefreshToken()
+        const acessToken = user.generateAccessToken()
+
+        user.refreshToken = refreshToken;
+        user.save({validateBeforeSave})
+
+        return {acessToken, refreshToken}
+    } catch (error) {
+        throw new ApiError(500, "Something wrong happened while generating AccessAndRefreshTokens")
+    }
+}
 const registerUser = asyncHandler(async(req, res) => {
     //S.1: get data from forntend-
     //S.2: Encrypt Decrypt pass with hasings ( considering the fact that we have validated all the form input values in frontend)
@@ -103,7 +118,30 @@ const loginUser = asyncHandler(async(req, res) => {
         throw new ApiError(401, "Invalid user credentials")
     }
 
+    const {refreshToken, acessToken} = await generateAccessAndRefreshTokens(findUser._id)
+    const loggedInUser = await User.findById(findUser._id).select("-password -refreshToken") //little optional
+    const option = {
+        httpOnly: true,
+        secure: true
+    }
+
+    return res.status(200)
+        .cookie("accesstoken", acessToken, option)
+        .cookie("refreshToken", refreshToken, option)
+        .json(
+            new ApiResponse(200, {
+                findUser: loggedInUser, acessToken, refreshToken
+            }, "User logged in succesfully")
+        )
 })
+
+//-------------------------------- LOGOUT USER --------------------------------------//
+//Assignment-
+//s1: check if user is login or not only then we can logout, i.e. check if loginUser returns 200 code.
+//s2: clear cookies and refresh tokens from user model
+    const logoutUser = asyncHandler( async(req, res) => {
+})
+
 export {
     registerUser, loginUser
 }
