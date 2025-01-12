@@ -140,8 +140,27 @@ const loginUser = asyncHandler(async(req, res) => {
 //s1: check if user is login or not only then we can logout, i.e. check if loginUser returns 200 code.
 //s2: clear cookies and refresh tokens from user model
     const logoutUser = asyncHandler( async(req, res) => {
+    User.findByIdAndUpdate(
+        req.user._id,
+        {
+            $set: {refreshToken: undefined}
+        },
+        {
+            new: true
+        }
+    )
+
+    const option = {
+        httpOnly: true,
+        secure: true
+    }
+
+    return res.status(200)
+    .clearCookie("accesstoken", option) //method by cookieparser to clear
+    .clearCookie("refreshToken", option)
+    .json(new ApiResponse(200, {}, "User Logged Out"))
 })
 
 export {
-    registerUser, loginUser
+    registerUser, loginUser, logoutUser
 }
