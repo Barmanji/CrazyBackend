@@ -57,8 +57,10 @@ userSchema.pre("save", async function(next) {
     this.password = await bcrypt.hash(this.password, 10)
     next()
 })
+
 userSchema.methods.isPasswordCorrect = async function(password) {
-    await bcrypt.compare(password, this.password)
+    const Password = await bcrypt.compare(password, this.password)
+    return Password;
 }
 
 userSchema.methods.generateAccessToken = function(){

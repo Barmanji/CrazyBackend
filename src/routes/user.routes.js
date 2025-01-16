@@ -1,8 +1,7 @@
 import { Router } from "express";
-import { loginUser, logoutUser, registerUser } from "../controllers/user.controller.js";
+import { generateAccessAndRefreshTokens, loginUser, logoutUser, registerUser } from "../controllers/user.controller.js";
 import { upload } from "../middlewares/multer.middleware.js";
-
-
+import { verifyJWT } from "../middlewares/auth.middleware.js";
 const router = Router()
 
 router.route("/register").post(
@@ -18,10 +17,12 @@ router.route("/register").post(
     registerUser
 ) //confusing Syntax, ====READ ABOUT IT====
 
-router.route("/login").post(
-    loginUser
-)
+router.route("/login").post(loginUser)
 
 //secured routes
-router.route("/logout").post(logoutUser)
+router.route("/logout").post(verifyJWT, logoutUser)
+router.route("/generateToken").get(generateAccessAndRefreshTokens)
 export default router;
+
+
+
