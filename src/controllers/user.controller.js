@@ -241,7 +241,7 @@ const changeCurrentPassword = asyncHandler(async(req, res)=>{
 
 const getCurrentUser = asyncHandler(async(req, res)=>{
     return res.status(200)
-    .json(200, req.user, "Current user fetched successfully")
+    .json(new ApiResponse(200, req.user, "Current user fetched successfully"))
 })
 
 const updateAccountDetails = asyncHandler(async(req, res)=>{
@@ -249,7 +249,7 @@ const updateAccountDetails = asyncHandler(async(req, res)=>{
     if(!fullname || !username){
         throw new ApiError(400, "All fields are necessary")
     }
-    const user = User.findByIdAndUpdate(
+    const user = await User.findByIdAndUpdate(
         req.user?._id,
         {
             $set: {
@@ -274,7 +274,7 @@ const updateUserAvatar = asyncHandler(async(req, res)=>{
     if(!avatarUpload.url){
         throw new ApiError(400, "Error while uploading avatar")
     }
-
+//DELETE THE OLD IMAGE! avatar- preferabaly delete it after uploading new one.
    const AvatarUpdate = await User.findByIdAndUpdate(req.user?._id, {
         $set: {
             avatar: avatar.url,
@@ -309,6 +309,59 @@ const updateUserCoverImage = asyncHandler(async(req, res)=>{
     .json(new ApiResponse(200, coverImageUpdate, "CoverImage added succesfully")) //just return empty PAYLOAD
 })
 
+const getUserChannelProfile = asyncHandler(async(res, req)=>{
+    const {username} = req.params;
+    if(!(username?.trim()=="")){  //can be done as !username?.trim()
+        throw new ApiError(404, "Username is not found")
+    }
+
+    //------------------- Aggrigation pipelines ------------------------//
+    const channel = await User.aggregate([
+        {
+            $match: {
+                username: username?.toLowerCase()
+            }
+        },
+        {
+            $lookup: {
+                from: "subsciptions",
+                localField: "_id",
+                foreignField: "channel",
+                as: "subscibers"
+            }
+        },
+        {
+            $lookup: { //looks from, localkey and foregn key are as said by the name
+                from: "subsciptions",
+                localField: "_id",
+                foreignField: "subsciber",
+                as: "subscibedTo"
+            }
+        },
+        {
+            $addFields: { //adds field
+                subscribersCount: {
+                    $size: "$subscibers"
+                },
+                channelsSubscribedToCount: {
+                    $size: "$subscribedTo"
+                },
+                isSubscribed: {
+                    $cond: { //takes three param {if: then: else: } or [.. , .. , ..]/{ $cond: [ <boolean-expression>, <true-case>, <false-case> ] } withut if else bla blaC
+                        if: {$in: [req.user?._id, "$subscibers.subsciber"]},//{ $in: [ <expression>, <array expression> ] }                         //{ $in: [ "abc", [ "xyz", "abc" ] ] } returns TRUE
+                        then: true,
+                        else: false
+                    }
+                }
+            }
+        }
+
+    ])
+
+    return res.status(200)
+    .json(new ApiResponse(200, channel, "Thats the channel"))
+
+})
 export {
     registerUser,
     loginUser,
@@ -319,5 +372,6 @@ export {
     getCurrentUser,
     updateAccountDetails,
     updateUserAvatar,
-    updateUserCoverImage
+    updateUserCoverImage,
+    getUserChannelProfile
 }
