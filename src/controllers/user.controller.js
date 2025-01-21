@@ -311,11 +311,9 @@ const updateUserCoverImage = asyncHandler(async(req, res)=>{
 })
 
 const getUserChannelProfile = asyncHandler(async(req, res)=>{
-    console.log("req.params :", req.params);
     const {username} = req.params;
-    console.log("req.params :", req.params);
     if(!username?.trim()){  //can be done as !username?.trim()
-        throw new ApiError(404, "Username is not found");
+        throw new ApiError(400, "Username is not found");
     }
 
     //------------------- Aggrigation pipelines ------------------------//
@@ -327,31 +325,31 @@ const getUserChannelProfile = asyncHandler(async(req, res)=>{
         },
         {
             $lookup: {
-                from: "subsciptions",
+                from: "subscriptions",
                 localField: "_id",
                 foreignField: "channel",
-                as: "subscibers"
+                as: "subscribers"
             }
         },
         {
             $lookup: { //looks from, localkey and foregn key are as said by the name
-                from: "subsciptions",
+                from: "subscriptions",
                 localField: "_id",
-                foreignField: "subsciber",
-                as: "subscibedTo"
+                foreignField: "subscriber",
+                as: "subscribedTo"
             }
         },
         {
             $addFields: { //adds field
                 subscribersCount: {
-                    $size: "$subscibers"
+                    $size: "$subscribers"
                 },
                 channelsSubscribedToCount: {
                     $size: "$subscribedTo"
                 },
                 isSubscribed: {
                     $cond: { //takes three param {if: then: else: } or [.. , .. , ..]/{ $cond: [ <boolean-expression>, <true-case>, <false-case> ] } withut if else bla blaC
-                        if: {$in: [req.user?._id, "$subscibers.subsciber"]},//{ $in: [ <expression>, <array expression> ] }                         //{ $in: [ "abc", [ "xyz", "abc" ] ] } returns TRUE
+                        if: {$in: [req.user?._id, "$subscribers.subscriber"]},//{ $in: [ <expression>, <array expression> ] }                         //{ $in: [ "abc", [ "xyz", "abc" ] ] } returns TRUE
                         then: true,
                         else: false
                     }
@@ -371,11 +369,10 @@ const getUserChannelProfile = asyncHandler(async(req, res)=>{
                 email: 1
             }
         },
-        console.log("channel: ", channel)
     ])
 
     if(!channel?.length) {
-        throw new ApiError(400, "channel doesnt exist")
+        throw new ApiError(404, "channel doesnt exist")
     }
     console.log("channel: ", channel)
     console.log("req.params :", req.params);
@@ -387,10 +384,10 @@ const getUserChannelProfile = asyncHandler(async(req, res)=>{
 //TODO: Change the posi of pipelines make it outside or nest it more then console it out.
 const getWatchHistory = asyncHandler(async(req, res)=>{
 //req.user._id returns a string not actuall ID
-    const user = User.aggregate([
+    const user = await User.aggregate([
         {
             $match: {
-                _id: new mongoose.Types.ObjectId.createFromHexString(req.user._id) //becuase req.user_id returns an string but we need obect ID SDE-2, dont do parseInd because we are inside an aggrigate pipeline in mongoose and it will not accept RAW ES6
+                _id: new mongoose.Types.ObjectId(req.user._id) //becuase req.user_id returns an string but we need obect ID SDE-2, dont do parseInd because we are inside an aggrigate pipeline in mongoose and it will not accept RAW ES6
                 //objectId was comming as strikethrough so i added createFromHexString, remove if error!
             }
         },
