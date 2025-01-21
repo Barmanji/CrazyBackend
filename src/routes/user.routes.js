@@ -38,7 +38,7 @@ router.route("/current-user").get(verifyJWT, getCurrentUser)
 router.route("/change-password").post(verifyJWT, changeCurrentPassword)
 router.route("/update-account").patch(verifyJWT, updateAccountDetails)  //without patch(update one) all detail update!! dont make it post
 router.route("/avatar").patch(verifyJWT,upload.single("avatar"), updateUserAvatar)
-router.route("/cover-image").post(verifyJWT,upload.single("/coverImage"), updateUserCoverImage)
+router.route("/cover-image").post(verifyJWT,upload.single("coverImage"), updateUserCoverImage)
 router.route("/c/:username").get(verifyJWT, getUserChannelProfile) //when using req.params u have to use c/: Read about it
 router.route("/watch-history").get(verifyJWT, getWatchHistory)
 
