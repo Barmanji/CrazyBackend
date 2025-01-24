@@ -117,7 +117,7 @@ Once you have completed the setup, you can run the project using:
 ```bash
 pnpm start
 ```
-This will start the server, and the application will be available on `http://localhost:3000`.
+This will start the server, and the application will be available on `http://localhost:8000`.
 
 ## API Endpoints
 
