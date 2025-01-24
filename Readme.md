@@ -208,4 +208,4 @@ This will start the server, and the application will be available on `http://loc
 - **CI/CD:** Set up automated testing and deployment pipelines.
 
 ### Liscense
-Project is Liscensed under ![ChaiAurCode](https://www.youtube.com/@chaiaurcode)
+Project is Liscensed under [ChaiAurCode](https://www.youtube.com/@chaiaurcode)
