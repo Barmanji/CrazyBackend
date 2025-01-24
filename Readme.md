@@ -82,7 +82,7 @@ This project is a backend system for a YouTube-like application that supports us
 1. **Clone the repository:**
     ```bash
     git clone git@github.com:Barmanji/CrazyBackend.git
-    cd Backend-youtube
+    cd CrazyBackend
     ```
 
 2. **Install dependencies:**
