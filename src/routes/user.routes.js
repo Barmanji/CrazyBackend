@@ -42,7 +42,7 @@ router.route("/cover-image").post(verifyJWT,upload.single("coverImage"), updateU
 router.route("/c/:username").get(verifyJWT, getUserChannelProfile) //when using req.params u have to use c/: Read about it
 router.route("/watch-history").get(verifyJWT, getWatchHistory)
 
-export default router;
+export default userRouter;
 
 
 
