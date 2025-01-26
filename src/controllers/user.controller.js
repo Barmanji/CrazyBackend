@@ -1,7 +1,7 @@
 import {asyncHandler} from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import { User } from "../models/user.model.js";
-import { uploadResultCloudinary } from "../utils/FileUploadCloudinary.js";
+import { uploadResultCloudinary, deleteFromCloudinary } from "../utils/FileUploadCloudinary.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import jwt from "jsonwebtoken";
 import mongoose from "mongoose";
@@ -80,7 +80,7 @@ const registerUser = asyncHandler(async(req, res) => {
     const user = await User.create({
         fullname,
         avatar: avatarUpload.url,
-        coverImage: coverImageLocalPath?.url || "",
+        coverImage: converImageUpload?.url || "",
         email,
         password,
         username: username.toLowerCase()
@@ -275,17 +275,22 @@ const updateUserAvatar = asyncHandler(async(req, res)=>{
     if(!avatarUpload.url){
         throw new ApiError(400, "Error while uploading avatar")
     }
-//DELETE THE OLD IMAGE! avatar- preferabaly delete it after uploading new one.
    const AvatarUpdate = await User.findByIdAndUpdate(req.user?._id, {
         $set: {
             avatar: avatar.url,
         }
     },
         {new: true}).select("-password")
+    const deleteOldAvatar = await deleteFromCloudinary(avatarLocalPath)
+    if(!deleteOldAvatar){
+        throw new ApiError(404, "Couldn't delete avatar")
+    }
 
-     return res.status(200)
-    .json(new ApiResponse(200, AvatarUpdate, "Avatar added succesfully")) //avatar.url is unnecrary and has been put by none other than BARMANJI
+    return res
+        .status(200)
+        .json(new ApiResponse(200, AvatarUpdate, "Avatar added succesfully")) //avatar.url is unnecrary and has been put by none other than BARMANJI
 })
+//DELETE THE OLD IMAGE! avatar- preferabaly delete it after uploading new one.
 
 const updateUserCoverImage = asyncHandler(async(req, res)=>{
     const coverImageLocalPath = req.file?.path
@@ -306,6 +311,10 @@ const updateUserCoverImage = asyncHandler(async(req, res)=>{
     },
         {new: true}).select("-password")
 
+    const deleteOldCoverImage = await deleteFromCloudinary(coverImageLocalPath)
+    if(!deleteOldCoverImage){
+        throw new ApiError(404, "Couldn't delete CoverImage")
+    }
      return res.status(200)
     .json(new ApiResponse(200, coverImageUpdate, "CoverImage added succesfully")) //just return empty PAYLOAD
 })
