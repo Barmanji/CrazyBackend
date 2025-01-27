@@ -247,6 +247,29 @@ const deleteVideo = asyncHandler(async (req, res) => {
 
 const togglePublishStatus = asyncHandler(async (req, res) => {
     const { videoId } = req.params
+    if (!isValidObjectId(videoId)) {
+        throw new ApiError(400, "Invalid Video ID");
+    }
+    const video = await Video.findById(req.params.videoId);
+    if (!video){
+        throw new ApiError(400, "Video cant be found")
+    }
+    if (video.owner.toString() !== req.user._id.toString()) {
+        throw new ApiError(403, "You are not allowed to delete this video");
+    }
+    const modifyVideoPublishStatus = await Video.findByIdAndUpdate(
+        videoId,
+        {
+            $set: {
+                isPublished: !video.isPublished,
+            },
+        },
+        { new: true }
+    );
+    res.status(200)
+        .json(new ApiResponse(200, modifyVideoPublishStatus, "video"))
+
+
 })
 
 export {
