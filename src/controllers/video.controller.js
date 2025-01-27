@@ -174,6 +174,19 @@ const publishAVideo = asyncHandler(async (req, res) => {
 const getVideoById = asyncHandler(async (req, res) => {
     const { videoId } = req.params
     //TODO: get video by id
+    if (!isValidObjectId(videoId)) {
+        throw new ApiError(400, "Invalid Video ID");
+    }
+    const video = await Video.findById(req.params.videoId);
+    if (!video){
+        throw new ApiError(400, "Video cant be found")
+    }
+    //if (video.owner.toString() !== req.user._id.toString()) {
+    //    throw new ApiError(403, "You are not allowed to update this video");
+    //}
+    const getVideoById = await Video.findById(videoId)
+    res.status(200)
+    .json(new ApiResponse(200, {getVideoById}, "Here's the required video"))
 })
 
 const updateVideo = asyncHandler(async (req, res) => {
