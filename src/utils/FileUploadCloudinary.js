@@ -6,7 +6,7 @@ cloudinary.config({
     api_key: process.env.CLOUDNARY_APIKEY,
     api_secret: process.env.CLOUDNARY_APISECRET,
 });
-let currentImage;
+//let currentImage;
 const uploadResultCloudinary = async (localFilePath) => {
     try {
         if(!localFilePath) return null;
@@ -16,7 +16,8 @@ const uploadResultCloudinary = async (localFilePath) => {
                 resource_type: 'auto' //file has beed uploaded!
             }
         )
-        currentImage = cloudinary.api.resources_by_asset_ids(localFilePath) //to give me link of file
+        //this current image is not the right way!
+        //currentImage = cloudinary.api.resources_by_asset_ids(localFilePath) //to give me link of file
         //console.log('file is uploaded on cloudiiiiiiiiiiiiiiiinarrrrrrrrrryyyyyyyy', responseCloudnary.url, uploadResultCloudinary);
         fs.unlinkSync(localFilePath)
         return responseCloudnary;
@@ -29,20 +30,17 @@ const uploadResultCloudinary = async (localFilePath) => {
     }
 }
 
-const deleteFromCloudinary = async () => {
-    try {
-        const responseCloudnary = await cloudinary.api.delete_resources(
-            currentImage,
-            {
-                type: 'upload',
-                resource_type: 'auto'
-            }
-        )
-        return responseCloudnary;
-    } catch(error) {
-        console.log("Error while deletion from cloudinary: ", error);
-        return null
-    }
-}
+
+const deleteFromCloudinary = async (cloudinaryFilepath) => {
+  try {
+    if (!cloudinaryFilepath) return null;
+    const fileName = cloudinaryFilepath.split("/").pop().split(".")[0];
+    const response = await cloudinary.uploader.destroy(fileName);
+    return response;
+  } catch (error) {
+    console.log("Error while deleting file from cloudinary : ", error);
+    return null;
+  }
+};
 
 export {uploadResultCloudinary, deleteFromCloudinary}

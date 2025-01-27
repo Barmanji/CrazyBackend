@@ -70,7 +70,7 @@ const registerUser = asyncHandler(async(req, res) => {
         throw new ApiError(400, "Avatar image is necessary")
     }
     const avatarUpload = await uploadResultCloudinary(avatarLocalPath);
-    const converImageUpload = await uploadResultCloudinary(coverImageLocalPath);
+    const coverImageUpload = await uploadResultCloudinary(coverImageLocalPath);
     if (!avatarUpload) {
         throw new ApiError(400, "Avatar image is very necessary")
     }
@@ -80,7 +80,7 @@ const registerUser = asyncHandler(async(req, res) => {
     const user = await User.create({
         fullname,
         avatar: avatarUpload.url,
-        coverImage: converImageUpload?.url || "",
+        coverImage: coverImageUpload?.url,
         email,
         password,
         username: username.toLowerCase()
@@ -265,26 +265,25 @@ const updateAccountDetails = asyncHandler(async(req, res)=>{
 })
 
 const updateUserAvatar = asyncHandler(async(req, res)=>{
-    const avatarLocalPath = req.file?.path
+    const avatarLocalPath = req.file?.path;
 
     if(!avatarLocalPath){
         throw new ApiError(400, "Avatar file is missing")
     }
 
+    const oldAvatar = req.user?.avatar;
+    oldAvatar && (await deleteFromCloudinary(oldAvatar)); //not understood
     const avatarUpload = await uploadResultCloudinary(avatarLocalPath)
+
     if(!avatarUpload.url){
         throw new ApiError(400, "Error while uploading avatar")
     }
-   const AvatarUpdate = await User.findByIdAndUpdate(req.user?._id, {
+    const AvatarUpdate = await User.findByIdAndUpdate(req.user?._id, {
         $set: {
-            avatar: avatar.url,
+            avatar: avatarUpload.url,
         }
     },
         {new: true}).select("-password")
-    const deleteOldAvatar = await deleteFromCloudinary(avatarLocalPath)
-    if(!deleteOldAvatar){
-        throw new ApiError(404, "Couldn't delete avatar")
-    }
 
     return res
         .status(200)
@@ -293,28 +292,26 @@ const updateUserAvatar = asyncHandler(async(req, res)=>{
 //DELETE THE OLD IMAGE! avatar- preferabaly delete it after uploading new one.
 
 const updateUserCoverImage = asyncHandler(async(req, res)=>{
-    const coverImageLocalPath = req.file?.path
+    const coverImageLocalPath = req.file?.path;
 
     if(!coverImageLocalPath){
         throw new ApiError(400, "Cover Image is missing")
     }
 
-    const coverImage = await uploadResultCloudinary(coverImage)
+    const oldCoverImage = req.user?.coverImage;
+    oldCoverImage && (await deleteFromCloudinary(oldCoverImage));
+    const coverImage = await uploadResultCloudinary(coverImageLocalPath)
     if(!coverImage.url){
         throw new ApiError(400, "Error while uploading CoverImage")
     }
 
    const coverImageUpdate =  await User.findByIdAndUpdate(req.user?._id, {
         $set: {
-            avatar: coverImage.url,
+            coverImage: coverImage.url,
         }
     },
         {new: true}).select("-password")
 
-    const deleteOldCoverImage = await deleteFromCloudinary(coverImageLocalPath)
-    if(!deleteOldCoverImage){
-        throw new ApiError(404, "Couldn't delete CoverImage")
-    }
      return res.status(200)
     .json(new ApiResponse(200, coverImageUpdate, "CoverImage added succesfully")) //just return empty PAYLOAD
 })
