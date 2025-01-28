@@ -123,12 +123,67 @@ import { deleteFromCloudinary, uploadResultCloudinary } from "../utils/FileUploa
 //    "message": "Video uploaded succesfully",
 //    "success": true
 //}
+
 const getAllVideos = asyncHandler(async (req, res) => {
     const { page = 1, limit = 10, query, sortBy, sortType, userId } = req.query
     //TODO: get all videos based on query, sort, pagination
+    const home = await Video.aggregate([
+        {
+            $match: {
+                $or: [ //matches from title and desc. Document 1 ("Funny Video")
+                    //  { "title": "Funny Video", "description": "A very fun video" },
+                    //   { "title": "Workouts", "description": "Stay fit and healthy" } It will not match Document 3 because neither the title nor the description contains "fun".
+                    {
+                        title: { $regex: query, $options: "i" }, //With $regex:Matches partial strings or patterns. Case-insensitive if $options: "i" is specified.
+                        //Example: Searching for "fun" will match "funny", "FUNNY", "superfun", etc.
+                    },
+                    {
+                        description: { $regex: query, $options: "i" },
+                    },
+                ],
+            }
+        }, // ------- THIS PART I CHEATED! It waas  haard -----------//
+        {
+            $lookup: {
+                from: "users",
+                localField: "owner",
+                foreignField: "_id",
+                as: "createdBy"
+            }
+        },
+        {
+            $unwind: "$createdBy",
+        },
+        {
+            $project: {
+                thumbnail: 1,
+                videoFile: 1,
+                title: 1,
+                description: 1,
+                createdBy: {
+                    fullName: 1,
+                    username: 1,
+                    avatar: 1,
+                },
+            },
+        },
+        {
+            $sort: {
+                [sortBy]: sortType === "asc" ? 1 : -1,
+            },
+        },
+        {
+            $skip: (page - 1) * limit,
+        },
+        {
+            $limit: parseInt(limit),
+        },
+    ]);
+    return res
+        .status(200)
+        .json(new ApiResponse(200, home, "Fetched All Videos"));
 
-})
-
+});
 const publishAVideo = asyncHandler(async (req, res) => {
     const { title, description} = req.body
     // TODO: get video, upload to cloudinary, create video
@@ -220,7 +275,6 @@ const updateVideo = asyncHandler(async (req, res) => {
     if(!thumbnailUpload?.url){
         throw new ApiError(404, "Thumbnail hasn't uploaded, there is some error with cloudinary")
     }
-
     const updateVideoFields = await Video.findByIdAndUpdate(
         req.params.videoId, {
             $set: {
@@ -250,9 +304,9 @@ const deleteVideo = asyncHandler(async (req, res) => {
     }
 
 
-    const deleteVideo = await deleteFromCloudinary(video.videoFile)
-    const deleteThumbnail = await deleteFromCloudinary(video.thumbnail)
-    const deleteFromDatabase = await Video.findByIdAndDelete(videoId);
+    await deleteFromCloudinary(video.videoFile)
+    await deleteFromCloudinary(video.thumbnail)
+    await Video.findByIdAndDelete(videoId);
     res.status(200)
         .json(new ApiResponse(200, {}, "Video is deleted succesfully"))
 
