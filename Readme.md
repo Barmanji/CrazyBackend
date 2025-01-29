@@ -136,8 +136,6 @@ This will start the server, and the application will be available on `http://loc
 | GET    | `/api/v1/user/c/:username`     | Give channel details like subcribers and all | Yes       |
 | GET    | `/api/v1/user/history`         | Give watchHistory of login user              | Yes       |
 
-### ------------------------- Working Assignments currently (To be soon) ----------------------------------- ###
-
 ### Videos
 | Method | Endpoint                    | Description                       | Protected |
 |--------|-----------------------------|-----------------------------------|-----------|
