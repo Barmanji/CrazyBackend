@@ -9,6 +9,7 @@
 - [Running the Project](#running-the-project)
 - [API Endpoints](#api-endpoints)
 - [Future Improvements](#future-improvements)
+- [Liscensing](#liscense)
 
 ## Overview
 This project is a backend system for a YouTube-like application that supports user registration, login, and logout functionalities. As development progresses, more features like video uploading, comments, likes, and subscriptions are being added.
