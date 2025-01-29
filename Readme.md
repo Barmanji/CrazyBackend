@@ -119,7 +119,7 @@ pnpm start
 ```
 This will start the server, and the application will be available on `http://localhost:8000`.
 
-## API Endpoints
+## [API Endpoints](https://app.getpostman.com/join-team?invite_code=7eb59cbca1b4223055e577eaeb6a09078fadf3e5d2d0adadf9745a25c5e7bf37)
 
 ### User
 | Method | Endpoint                       | Description                                  | Protected |
